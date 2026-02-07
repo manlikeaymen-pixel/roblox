@@ -121,4 +121,5 @@ res.sendStatus(200);
 const port = process.env.PORT || 3000;
 app.listen(port, '0.0.0.0', () => {
 console.log(`Grabber server running on port ${port}`);
-});
+});app.get('/health', (req, res) => res.send('Server is healthy!'));
+
